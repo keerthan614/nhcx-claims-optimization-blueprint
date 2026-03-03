@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>NHA_304460 — Claims Processing Optimisation via NHCX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        :root {
+            --bg: #0a0a1a;
+            --card: #12122a;
+            --accent: #6366f1;
+            --cyan: #06b6d4;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --grad: linear-gradient(135deg, #6366f1, #06b6d4)
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw
+        }
+
+        .slide {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            padding: 56px 72px;
+            position: relative;
+            flex-direction: column;
+            justify-content: center
+        }
+
+        .slide.active {
+            display: flex
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 25% 35%, rgba(6, 182, 212, .1), transparent 55%), radial-gradient(ellipse at 75% 65%, rgba(99, 102, 241, .08), transparent 55%);
+            pointer-events: none
+        }
+
+        .slide-num {
+            position: absolute;
+            bottom: 28px;
+            right: 48px;
+            font-size: .82rem;
+            color: var(--muted);
+            font-weight: 500
+        }
+
+        .logo-bar {
+            position: absolute;
+            top: 28px;
+            left: 48px;
+            right: 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .logo {
+            font-size: .85rem;
+            font-weight: 700;
+            background: var(--grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .tag {
+            font-size: .7rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(6, 182, 212, .15);
+            color: #22d3ee;
+            border: 1px solid rgba(6, 182, 212, .3);
+            font-weight: 600
+        }
+
+        .title-slide .main-title {
+            font-size: 2.8rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 14px;
+            background: var(--grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .title-slide .subtitle {
+            font-size: 1.2rem;
+            color: var(--muted);
+            font-weight: 400;
+            margin-bottom: 36px;
+            max-width: 720px;
+            line-height: 1.5
+        }
+
+        .title-slide .meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+
+        .title-slide .meta span {
+            font-size: .73rem;
+            padding: 6px 14px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 255, 255, .08);
+            font-weight: 500
+        }
+
+        h2 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.2
+        }
+
+        h2 .hl {
+            background: var(--grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        h3 {
+            font-size: .92rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--cyan)
+        }
+
+        .grid2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px
+        }
+
+        .grid3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 18px
+        }
+
+        .grid4 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 14px
+        }
+
+        .box {
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 14px;
+            padding: 20px;
+            transition: all .3s
+        }
+
+        .box:hover {
+            border-color: rgba(6, 182, 212, .3);
+            transform: translateY(-2px)
+        }
+
+        .box p,
+        .box li {
+            font-size: .78rem;
+            color: var(--muted);
+            line-height: 1.55
+        }
+
+        .box ul {
+            list-style: none;
+            padding: 0
+        }
+
+        .box li {
+            padding: 2px 0
+        }
+
+        .box li::before {
+            content: '→ ';
+            color: var(--cyan)
+        }
+
+        .icon {
+            font-size: 1.6rem;
+            margin-bottom: 6px
+        }
+
+        .stat {
+            text-align: center;
+            padding: 16px
+        }
+
+        .stat .n {
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: var(--grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .stat .l {
+            font-size: .72rem;
+            color: var(--muted);
+            margin-top: 4px
+        }
+
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+            margin: 16px 0;
+            flex-wrap: wrap
+        }
+
+        .flow .step {
+            background: rgba(6, 182, 212, .1);
+            border: 1px solid rgba(6, 182, 212, .25);
+            padding: 9px 14px;
+            border-radius: 10px;
+            font-size: .74rem;
+            font-weight: 600;
+            text-align: center
+        }
+
+        .flow .arrow {
+            color: var(--cyan);
+            font-weight: 700;
+            font-size: 1.1rem
+        }
+
+        .pill {
+            display: inline-block;
+            font-size: .65rem;
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-right: 3px
+        }
+
+        .pill-g {
+            background: rgba(16, 185, 129, .15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, .3)
+        }
+
+        .pill-r {
+            background: rgba(239, 68, 68, .15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, .3)
+        }
+
+        .pill-a {
+            background: rgba(245, 158, 11, .15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, .3)
+        }
+
+        .pill-b {
+            background: rgba(99, 102, 241, .15);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, .3)
+        }
+
+        .pill-c {
+            background: rgba(6, 182, 212, .15);
+            color: #22d3ee;
+            border: 1px solid rgba(6, 182, 212, .3)
+        }
+
+        .table-wrap {
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .08)
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .76rem
+        }
+
+        th {
+            background: rgba(6, 182, 212, .12);
+            padding: 9px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--cyan);
+            border-bottom: 1px solid rgba(255, 255, 255, .08)
+        }
+
+        td {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, .04);
+            color: var(--muted)
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, .02)
+        }
+
+        .note {
+            font-size: .68rem;
+            color: var(--muted);
+            margin-top: 12px;
+            font-style: italic;
+            text-align: center
+        }
+
+        .cmp {
+            display: flex;
+            gap: 16px;
+            align-items: stretch
+        }
+
+        .cmp-col {
+            flex: 1;
+            border-radius: 14px;
+            padding: 18px
+        }
+
+        .cmp-before {
+            background: rgba(239, 68, 68, .06);
+            border: 1px solid rgba(239, 68, 68, .15)
+        }
+
+        .cmp-after {
+            background: rgba(16, 185, 129, .06);
+            border: 1px solid rgba(16, 185, 129, .15)
+        }
+
+        .cmp-col h3 {
+            margin-bottom: 10px
+        }
+
+        .nav {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 100
+        }
+
+        .nav button {
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid rgba(255, 255, 255, .1);
+            color: var(--text);
+            padding: 8px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Inter';
+            font-size: .78rem;
+            font-weight: 500;
+            transition: all .2s
+        }
+
+        .nav button:hover {
+            background: rgba(6, 182, 212, .2);
+            border-color: rgba(6, 182, 212, .4)
+        }
+
+        .dots {
+            display: flex;
+            gap: 6px;
+            align-items: center
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .15);
+            transition: all .3s
+        }
+
+        .dot.a {
+            background: var(--cyan);
+            box-shadow: 0 0 10px rgba(6, 182, 212, .5)
+        }
+
+        @media print {
+            .slide {
+                display: flex !important;
+                page-break-after: always;
+                height: 100vh;
+                width: 100vw
+            }
+
+            .nav {
+                display: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ══════════ SLIDE 1: SUMMARY ══════════ -->
+    <div class="slide title-slide active" id="s1">
+        <div class="logo-bar"><span class="logo">NHA_304460</span><span class="tag">Ideathon PS-05</span></div>
+        <div style="position:relative;z-index:1">
+            <p style="font-size:.82rem;color:var(--cyan);font-weight:600;margin-bottom:10px;letter-spacing:.05em">NHCX
+                CLAIMS PROCESSING OPTIMISATION</p>
+            <h1 class="main-title">From 15 Days to 15 Minutes:<br>NHCX-Driven Claims Automation</h1>
+            <p class="subtitle">Leveraging NHCX's standardised FHIR workflows, ABHA-linked health records, structured
+                pre-authorisation, and real-time eligibility checks to collapse claims processing from weeks to minutes
+                — saving the Indian health insurance ecosystem <strong style="color:#34d399">₹12,000+ Cr</strong>
+                annually in operational costs.</p>
+            <div class="meta">
+                <span>⚡ Real-Time Eligibility</span>
+                <span>📋 Structured Pre-Auth</span>
+                <span>🔄 Auto-Adjudication</span>
+                <span>🆔 ABHA-Linked Records</span>
+                <span>📊 Zero Re-Submissions</span>
+            </div>
+        </div>
+        <div class="slide-num">1 / 6</div>
+    </div>
+
+    <!-- ══════════ SLIDE 2: BUSINESS PROBLEM ══════════ -->
+    <div class="slide" id="s2">
+        <div class="logo-bar"><span class="logo">NHA_304460</span><span class="tag">Business Problem</span></div>
+        <div style="position:relative;z-index:1">
+            <h2>The ₹18,000 Cr <span class="hl">Efficiency Gap</span></h2>
+
+            <div class="grid4" style="margin-bottom:16px">
+                <div class="box stat">
+                    <div class="n">15-30 days</div>
+                    <div class="l">Average claim settlement time (cashless: 3-5 days)</div>
+                </div>
+                <div class="box stat">
+                    <div class="n">₹450</div>
+                    <div class="l">Avg. cost to process one claim (industry benchmark)</div>
+                </div>
+                <div class="box stat">
+                    <div class="n">30-40%</div>
+                    <div class="l">Claims requiring re-submission due to errors/missing data</div>
+                </div>
+                <div class="box stat">
+                    <div class="n">₹18K Cr</div>
+                    <div class="l">Annual operational cost of claims processing (est.)</div>
+                </div>
+            </div>
+
+            <div class="grid2">
+                <div class="box">
+                    <h3>🔴 Root Causes of Delay & Cost</h3>
+                    <ul>
+                        <li><strong>No standardisation:</strong> Each insurer/TPA has proprietary formats — providers
+                            submit differently to each</li>
+                        <li><strong>Manual data entry:</strong> Hospital staff re-key data from EMRs into insurer
+                            portals</li>
+                        <li><strong>Eligibility uncertainty:</strong> Providers can't verify coverage in real-time
+                            before treatment</li>
+                        <li><strong>Error-laden submissions:</strong> 35% claims rejected on first submission (wrong
+                            codes, missing fields)</li>
+                        <li><strong>Ping-pong follow-ups:</strong> Avg. 3.2 back-and-forth cycles per claim for
+                            clarifications</li>
+                        <li><strong>Duplicate effort:</strong> Same patient data re-entered for pre-auth, then again for
+                            claim</li>
+                    </ul>
+                </div>
+                <div class="box">
+                    <h3>🟢 What NHCX Changes</h3>
+                    <ul>
+                        <li><span class="pill pill-c">FHIR</span> One standard format for ALL insurers — submit once,
+                            accepted everywhere</li>
+                        <li><span class="pill pill-g">Eligibility</span> Real-time CoverageEligibilityRequest/Response
+                            before admission</li>
+                        <li><span class="pill pill-b">Pre-Auth</span> Structured ClaimRequest with coded diagnoses +
+                            procedures</li>
+                        <li><span class="pill pill-a">ABHA</span> Patient's verified health records attached
+                            automatically</li>
+                        <li><span class="pill pill-r">Errors</span> Standard error codes (OperationOutcome) → fix before
+                            submission</li>
+                        <li><span class="pill pill-c">Workflows</span> Protocol-driven state machines → no manual
+                            tracking</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-num">2 / 6</div>
+    </div>
+
+    <!-- ══════════ SLIDE 3: APPROACH ══════════ -->
+    <div class="slide" id="s3">
+        <div class="logo-bar"><span class="logo">NHA_304460</span><span class="tag">Approach</span></div>
+        <div style="position:relative;z-index:1">
+            <h2>End-to-End <span class="hl">Workflow Automation</span></h2>
+
+            <div class="flow">
+                <div class="step">🆔 ABHA Login<br><small>Patient ID</small></div>
+                <div class="arrow">→</div>
+                <div class="step">✅ Eligibility<br><small>Real-time API</small></div>
+                <div class="arrow">→</div>
+                <div class="step">📋 Pre-Auth<br><small>FHIR Claim</small></div>
+                <div class="arrow">→</div>
+                <div class="step">🏥 Treatment<br><small>ABHA records</small></div>
+                <div class="arrow">→</div>
+                <div class="step">📄 Final Claim<br><small>Auto-populated</small></div>
+                <div class="arrow">→</div>
+                <div class="step" style="background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.3)">💰
+                    Settlement<br><small>Auto-adjudicate</small></div>
+            </div>
+
+            <div class="grid3" style="margin-top:12px">
+                <div class="box">
+                    <div class="icon">✅</div>
+                    <h3>1. Real-Time Eligibility</h3>
+                    <p><strong>NHCX API:</strong> CoverageEligibilityRequest/Response</p>
+                    <p><strong>Before:</strong> Provider calls TPA, waits 24-48 hrs for eligibility confirmation</p>
+                    <p><strong>After:</strong> Instant API call returns coverage details, sub-limits, waiting periods in
+                        &lt;2 seconds</p>
+                    <p><strong>Impact:</strong> Eliminates 80% of "coverage denied" rejections post-treatment</p>
+                </div>
+                <div class="box">
+                    <div class="icon">📋</div>
+                    <h3>2. Structured Pre-Authorization</h3>
+                    <p><strong>NHCX API:</strong> ClaimRequest (pre-auth) with ICD-10/SNOMED codes</p>
+                    <p><strong>Before:</strong> Freetext forms, scanned documents, manual review</p>
+                    <p><strong>After:</strong> Coded diagnosis + procedure, auto-validated against policy rules,
+                        response in minutes</p>
+                    <p><strong>Impact:</strong> Pre-auth TAT from 3 days → 30 minutes (rule-based auto-approval)</p>
+                </div>
+                <div class="box">
+                    <div class="icon">🔄</div>
+                    <h3>3. Zero-Resubmission Claims</h3>
+                    <p><strong>NHCX API:</strong> OperationOutcome (structured error responses)</p>
+                    <p><strong>Before:</strong> Claim rejected → provider guesses what's wrong → resubmits → rejected
+                        again</p>
+                    <p><strong>After:</strong> Real-time validation with specific error codes + fix suggestions before
+                        submission</p>
+                    <p><strong>Impact:</strong> First-pass acceptance rate: 60% → 95%</p>
+                </div>
+                <div class="box">
+                    <div class="icon">🆔</div>
+                    <h3>4. ABHA-Linked Records</h3>
+                    <p><strong>Capability:</strong> Patient's verified health records auto-attached to claims</p>
+                    <p><strong>Before:</strong> Hospital scans reports, insurer re-verifies, requests more docs</p>
+                    <p><strong>After:</strong> DiagnosticReport + DischargeSummary bundles pulled from ABHA
+                        automatically</p>
+                    <p><strong>Impact:</strong> Document collection time: 5 days → 0 (already linked)</p>
+                </div>
+                <div class="box">
+                    <div class="icon">🤖</div>
+                    <h3>5. Auto-Adjudication Engine</h3>
+                    <p><strong>Capability:</strong> Standardised FHIR claims enable rule-based auto-adjudication</p>
+                    <p><strong>Before:</strong> Human adjudicator reviews each claim (15-30 min per claim)</p>
+                    <p><strong>After:</strong> 70% of claims auto-adjudicated in &lt;1 minute using coded data</p>
+                    <p><strong>Impact:</strong> Adjudicator productivity: 30 claims/day → 200 claims/day</p>
+                </div>
+                <div class="box">
+                    <div class="icon">📊</div>
+                    <h3>6. InsurancePlan Standardisation</h3>
+                    <p><strong>Capability:</strong> FHIR InsurancePlan resource published by all insurers</p>
+                    <p><strong>Before:</strong> Providers don't know coverage limits → bill beyond policy → claim
+                        partially denied</p>
+                    <p><strong>After:</strong> Machine-readable plans enable real-time benefit checks at point of care
+                    </p>
+                    <p><strong>Impact:</strong> Partial denial rate: 25% → 5%</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-num">3 / 6</div>
+    </div>
+
+    <!-- ══════════ SLIDE 4: BUSINESS IMPACT ══════════ -->
+    <div class="slide" id="s4">
+        <div class="logo-bar"><span class="logo">NHA_304460</span><span class="tag">Business Impact</span></div>
+        <div style="position:relative;z-index:1">
+            <h2>Measurable <span class="hl">Value Realisation</span></h2>
+
+            <div class="grid4" style="margin-bottom:14px">
+                <div class="box stat">
+                    <div class="n">₹12K Cr</div>
+                    <div class="l">Annual operational cost savings (67% reduction)</div>
+                </div>
+                <div class="box stat" style="border-color:rgba(6,182,212,.3)">
+                    <div class="n"
+                        style="background:linear-gradient(135deg,#06b6d4,#10b981);-webkit-background-clip:text;background-clip:text">
+                        15d → 15min</div>
+                    <div class="l">Claim settlement time (auto-adjudicated)</div>
+                </div>
+                <div class="box stat" style="border-color:rgba(16,185,129,.3)">
+                    <div class="n"
+                        style="background:linear-gradient(135deg,#10b981,#34d399);-webkit-background-clip:text;background-clip:text">
+                        60% → 95%</div>
+                    <div class="l">First-pass acceptance rate</div>
+                </div>
+                <div class="box stat">
+                    <div class="n">₹450 → ₹80</div>
+                    <div class="l">Cost per claim processed</div>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>NHCX Capability</th>
+                            <th>Process Optimised</th>
+                            <th>Time Saved</th>
+                            <th>Cost Impact (annual, est.)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="pill pill-c">Eligibility API</span> Real-time check</td>
+                            <td>Coverage verification before admission</td>
+                            <td>48 hrs → 2 sec</td>
+                            <td>₹1,500 Cr (eliminates post-treatment denials)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="pill pill-b">Pre-Auth</span> Structured FHIR</td>
+                            <td>Pre-authorization approval</td>
+                            <td>3 days → 30 min</td>
+                            <td>₹2,000 Cr (auto-approval for standard cases)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="pill pill-r">Error Codes</span> OperationOutcome</td>
+                            <td>First-pass submission quality</td>
+                            <td>Saves 3.2 cycles</td>
+                            <td>₹2,500 Cr (reduces 35% resubmission rate to 5%)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="pill pill-g">ABHA</span> Linked health records</td>
+                            <td>Document collection & verification</td>
+                            <td>5 days → 0</td>
+                            <td>₹1,500 Cr (zero manual document follow-up)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="pill pill-a">Auto-adjudicate</span> FHIR-enabled</td>
+                            <td>Claim review & decision</td>
+                            <td>15 min → 1 min</td>
+                            <td>₹3,500 Cr (70% claims auto-processed)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="pill pill-c">InsurancePlan</span> Benefit check</td>
+                            <td>Treatment cost alignment</td>
+                            <td>Eliminates surprise</td>
+                            <td>₹1,000 Cr (partial denial reduction)</td>
+                        </tr>
+                        <tr style="background:rgba(16,185,129,.05)">
+                            <td colspan="2"><strong>Total Ecosystem Savings</strong></td>
+                            <td><strong>15 days → 15 min</strong></td>
+                            <td><strong>₹12,000 Cr/year</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="note">Based on 4Cr+ annual health insurance claims (IRDAI FY24), avg processing cost ₹450, 40M
+                claims via NHCX by Year 3.</p>
+        </div>
+        <div class="slide-num">4 / 6</div>
+    </div>
+
+    <!-- ══════════ SLIDE 5: STRENGTHENING LEVERS ══════════ -->
+    <div class="slide" id="s5">
+        <div class="logo-bar"><span class="logo">NHA_304460</span><span class="tag">Strengthening Levers</span></div>
+        <div style="position:relative;z-index:1">
+            <h2>Making It <span class="hl">Even More Robust</span></h2>
+
+            <div class="grid3">
+                <div class="box">
+                    <div class="icon">🏥</div>
+                    <h3>HMIS Integration Layer</h3>
+                    <ul>
+                        <li>NHCX-ready plugins for top 10 HMIS platforms (covering 60% of hospitals)</li>
+                        <li>Auto-generate FHIR claims from EMR data — zero manual entry</li>
+                        <li>One-click pre-auth from doctor's prescription screen</li>
+                        <li>Real-time claim status updates inside hospital workflow</li>
+                    </ul>
+                </div>
+                <div class="box">
+                    <div class="icon">🤖</div>
+                    <h3>AI-Powered Auto-Adjudication</h3>
+                    <ul>
+                        <li>ML models trained on standardised FHIR claims data across ecosystem</li>
+                        <li>Auto-approve routine claims (appendectomy, normal delivery, cataract)</li>
+                        <li>Flag complex cases for human review with pre-computed evidence</li>
+                        <li>Continuous learning: adjudicator feedback improves models</li>
+                    </ul>
+                </div>
+                <div class="box">
+                    <div class="icon">📱</div>
+                    <h3>Patient Transparency</h3>
+                    <ul>
+                        <li>Real-time claim status via ABHA app (no calling insurer helpline)</li>
+                        <li>Estimated out-of-pocket before treatment (via InsurancePlan API)</li>
+                        <li>Digital consent for pre-auth via ABHA authentication</li>
+                        <li>Instant e-settlement notification + payment reconciliation</li>
+                    </ul>
+                </div>
+                <div class="box">
+                    <div class="icon">📊</div>
+                    <h3>Provider Scorecarding</h3>
+                    <ul>
+                        <li>Score providers on claim quality (first-pass rate, error frequency)</li>
+                        <li>Fast-track claims from high-scoring providers (green channel)</li>
+                        <li>Incentivise compliance with NHCX standards</li>
+                        <li>Publish provider benchmarks for payer-provider trust</li>
+                    </ul>
+                </div>
+                <div class="box">
+                    <div class="icon">⚙️</div>
+                    <h3>Smart Error Prevention</h3>
+                    <ul>
+                        <li>Real-time FHIR validation at HMIS level (before submission)</li>
+                        <li>Auto-suggest correct ICD/SNOMED codes based on clinical notes</li>
+                        <li>Pre-submission rules engine: check policy limits, exclusions, waiting periods</li>
+                        <li>Eliminate the #1 cause of delay: incomplete submissions</li>
+                    </ul>
+                </div>
+                <div class="box">
+                    <div class="icon">🔗</div>
+                    <h3>Ecosystem Analytics</h3>
+                    <ul>
+                        <li>Standardised data enables industry-wide benchmarking</li>
+                        <li>Average cost-per-procedure by geography, facility tier</li>
+                        <li>Claims lifecycle dashboards for regulators (IRDAI)</li>
+                        <li>Predictive analytics: seasonal demand, capacity planning</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-num">5 / 6</div>
+    </div>
+
+    <!-- ══════════ SLIDE 6: ECONOMIC MODEL ══════════ -->
+    <div class="slide" id="s6">
+        <div class="logo-bar"><span class="logo">NHA_304460</span><span class="tag">Economic Model & Conclusion</span>
+        </div>
+        <div style="position:relative;z-index:1">
+            <h2>5-Year <span class="hl">ROI Model</span></h2>
+
+            <div class="grid2" style="margin-bottom:14px">
+                <div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Year 1</th>
+                                    <th>Year 3</th>
+                                    <th>Year 5</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Claims via NHCX</td>
+                                    <td>5M</td>
+                                    <td>40M</td>
+                                    <td>120M</td>
+                                </tr>
+                                <tr>
+                                    <td>Avg. Processing Cost</td>
+                                    <td>₹300</td>
+                                    <td>₹120</td>
+                                    <td>₹80</td>
+                                </tr>
+                                <tr>
+                                    <td>Cost Savings vs ₹450</td>
+                                    <td>₹750 Cr</td>
+                                    <td>₹5,200 Cr</td>
+                                    <td>₹14,400 Cr</td>
+                                </tr>
+                                <tr>
+                                    <td>TAT Improvement</td>
+                                    <td>15d → 5d</td>
+                                    <td>5d → 1d</td>
+                                    <td>1d → 15min</td>
+                                </tr>
+                                <tr>
+                                    <td>First-Pass Rate</td>
+                                    <td>75%</td>
+                                    <td>90%</td>
+                                    <td>95%</td>
+                                </tr>
+                                <tr>
+                                    <td>Platform Cost</td>
+                                    <td>₹300 Cr</td>
+                                    <td>₹200 Cr</td>
+                                    <td>₹150 Cr</td>
+                                </tr>
+                                <tr style="background:rgba(16,185,129,.08)">
+                                    <td><strong>Net Value</strong></td>
+                                    <td><strong>₹450 Cr</strong></td>
+                                    <td><strong>₹5,000 Cr</strong></td>
+                                    <td><strong>₹14,250 Cr</strong></td>
+                                </tr>
+                                <tr style="background:rgba(6,182,212,.08)">
+                                    <td><strong>Cumulative ROI</strong></td>
+                                    <td><strong>1.5x</strong></td>
+                                    <td><strong>18x</strong></td>
+                                    <td><strong>43x</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <div class="box" style="height:100%;display:flex;flex-direction:column;justify-content:center">
+                        <h3 style="margin-bottom:14px">💡 Key Takeaway</h3>
+                        <p style="font-size:.95rem;line-height:1.6;color:var(--text)">
+                            NHCX transforms claims from a <strong>manual, error-prone, multi-week process</strong> into
+                            a <strong>real-time, auto-adjudicated, digital workflow</strong>.
+                        </p>
+                        <p style="font-size:.85rem;line-height:1.6;color:var(--muted);margin-top:10px">
+                            The six capabilities — <span class="pill pill-c">Eligibility</span> <span
+                                class="pill pill-b">Pre-Auth</span> <span class="pill pill-r">Error Codes</span> <span
+                                class="pill pill-g">ABHA Records</span> <span class="pill pill-a">Auto-Adjudicate</span>
+                            <span class="pill pill-c">InsurancePlan</span> — together eliminate every manual step in the
+                            claims lifecycle.
+                        </p>
+                        <p style="font-size:.85rem;line-height:1.6;color:var(--muted);margin-top:8px">
+                            <strong>Providers</strong> save hours per claim. <strong>Insurers</strong> cut costs by 82%.
+                            <strong>Patients</strong> get faster settlements. The entire ecosystem wins.
+                        </p>
+                        <p style="font-size:.85rem;line-height:1.6;color:#34d399;margin-top:14px;font-weight:600">
+                            ₹12,000 Cr+ savings · 15 days → 15 min · 95% first-pass · 43x ROI
+                        </p>
+                        <p style="font-size:.75rem;color:var(--muted);margin-top:16px">
+                            <strong>Participant:</strong> Keerthan Reddy | <strong>ID:</strong> NHA_304460
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slide-num">6 / 6</div>
+    </div>
+
+    <div class="nav">
+        <button onclick="go(-1)">← Prev</button>
+        <div class="dots" id="dots"></div>
+        <button onclick="go(1)">Next →</button>
+    </div>
+    <script>
+        let cur = 0; const slides = document.querySelectorAll('.slide'), dots = document.getElementById('dots');
+        slides.forEach((_, i) => { const d = document.createElement('div'); d.className = 'dot' + (i === 0 ? ' a' : ''); d.onclick = () => show(i); dots.appendChild(d) });
+        function show(n) { cur = Math.max(0, Math.min(n, slides.length - 1)); slides.forEach((s, i) => { s.classList.toggle('active', i === cur) }); dots.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('a', i === cur)) }
+        function go(d) { show(cur + d) }
+        document.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === ' ') go(1); if (e.key === 'ArrowLeft') go(-1) });
+    </script>
+</body>
+
+</html>
