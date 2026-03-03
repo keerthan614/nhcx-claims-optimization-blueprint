@@ -1,4 +1,4 @@
-<![CDATA[# ⚡ NHCX Claims Processing Optimization Blueprint
+# ⚡ NHCX Claims Processing Optimization Blueprint
 
 > **From 15 Days to 15 Minutes** — A comprehensive blueprint for leveraging NHCX's standardized FHIR workflows to collapse claims processing time and save the Indian health insurance ecosystem **₹12,000+ Cr** annually.
 
@@ -73,4 +73,3 @@ MIT License — Built for the NHA NHCX Hackathon (PS-05)
 ---
 
 **Author:** Keerthan Reddy | **Participant ID:** NHA_304460
-]]>
